@@ -1,5 +1,7 @@
 package com.lucky.apibackend.common;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -7,6 +9,7 @@ import java.io.Serializable;
  * @date 2024/4/17
  * @description 通用返回类
  */
+@Data
 public class BaseResponse<T> implements Serializable {
 
     private static final long serialVersionUID = 835864364839927152L;

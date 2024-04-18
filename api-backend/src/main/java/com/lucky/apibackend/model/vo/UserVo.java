@@ -1,22 +1,22 @@
-package com.lucky.apibackend.model.entity;
+package com.lucky.apibackend.model.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
- * 用户
- * @TableName user
+ * @author lucky
+ * @date 2024/4/17
+ * @description 用户视图对象
  */
-@TableName(value ="user")
 @Data
-public class User implements Serializable {
+public class UserVo implements Serializable {
+
+    private static final long serialVersionUID = -4763760214159590280L;
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -45,11 +45,6 @@ public class User implements Serializable {
     private String userRole;
 
     /**
-     * 密码
-     */
-    private String userPassword;
-
-    /**
      * 用户状态 0-正常 1-封号
      */
     private Integer status;
@@ -73,13 +68,4 @@ public class User implements Serializable {
      * 更新时间
      */
     private Date updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }
