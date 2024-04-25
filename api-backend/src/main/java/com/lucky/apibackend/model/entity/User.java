@@ -55,6 +55,11 @@ public class User implements Serializable {
     private Integer status;
 
     /**
+     * 邀请码
+     */
+    private String invitationCode;
+
+    /**
      * accessKey
      */
     private String accessKey;

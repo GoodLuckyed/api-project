@@ -16,4 +16,14 @@ public class UserConstant {
      * 用户登录状态
      */
     public static final String USER_LOGIN_STATE = "userLoginState";
+
+    /**
+     * 默认权限
+     */
+    public static final String DEFAULT_ROLE = "user";
+
+    /**
+     * 管理员权限
+     */
+    public static final String ADMIN_ROLE = "admin";
 }

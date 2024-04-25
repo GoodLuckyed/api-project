@@ -40,6 +40,11 @@ public class InterfaceInfo implements Serializable {
     private String requestParams;
 
     /**
+     * 响应参数
+     */
+    private String responseParams;
+
+    /**
      * 请求头
      */
     private String requestHeader;
@@ -48,6 +53,16 @@ public class InterfaceInfo implements Serializable {
      * 响应头
      */
     private String responseHeader;
+
+    /**
+     * 返回格式
+     */
+    private String returnFormat;
+
+    /**
+     * 请求示例
+     */
+    private String requestExample;
 
     /**
      * 接口状态（0-关闭，1-开启）

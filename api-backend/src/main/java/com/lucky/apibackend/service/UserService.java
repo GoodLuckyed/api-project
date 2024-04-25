@@ -43,4 +43,11 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVo getLoginUser(HttpServletRequest request);
+
+    /**
+     * 是游客
+     * @param request
+     * @return
+     */
+    UserVo isTourist(HttpServletRequest request);
 }

@@ -22,6 +22,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
+        String invitationCode = userRegisterRequest.getInvitationCode();
 
         //校验
         if (StringUtils.isAllBlank(userName, userAccount, userPassword, checkPassword)) {
@@ -83,6 +85,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号已存在");
         }
+        User invitationUser = null;
+        if (StringUtils.isNotBlank(invitationCode)){
+            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            userLambdaQueryWrapper.eq(User::getInvitationCode,invitationCode);
+            //可能会有邀请码相同的用户，查出的不只一个
+            invitationUser = this.getOne(userLambdaQueryWrapper);
+            if (invitationUser == null){
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "邀请码不存在");
+            }
+        }
         //密码加密
         String encryptPassword = DigestUtils.md5DigestAsHex((UserConstant.SALT + userPassword).getBytes());
 
@@ -93,11 +105,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserPassword(encryptPassword);
         user.setAccessKey("111");
         user.setSecretKey("222");
+        //todo 给邀请和被邀请的用户的账户各添加30积分
+        user.setInvitationCode(generateRandomString(8));
         boolean save = this.save(user);
         if (!save){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败");
         }
         return user.getId();
+    }
+
+    /**
+     * 生成随机字符串
+     * @param length
+     * @return
+     */
+    private String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder(length);
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            char randomChar = characters.charAt(index);
+            sb.append(randomChar);
+        }
+        return sb.toString();
     }
 
     /**
@@ -180,22 +211,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserVo getLoginUser(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE + token);
-        User loginUser = (User) userObj;
+        UserVo loginUser = (UserVo) userObj;
         if (loginUser == null || loginUser.getId() == null){
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户未登录");
         }
-        //从数据库查询
-        Long userId = loginUser.getId();
-        User user = this.getById(userId);
-        if (user == null){
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
-        }
-        if (user.getStatus().equals(UserAccountStatusEnum.BAN.getValue())){
+        if (loginUser.getStatus().equals(UserAccountStatusEnum.BAN.getValue())){
             throw new BusinessException(ErrorCode.PROHIBITED, "账号已封禁");
         }
-        UserVo userVo = new UserVo();
-        BeanUtils.copyProperties(user, userVo);
-        return userVo;
+        return loginUser;
+    }
+
+    /**
+     * 是游客
+     * @param request
+     * @return
+     */
+    @Override
+    public UserVo isTourist(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE + token);
+        UserVo loginUser = (UserVo) userObj;
+        if (loginUser == null || loginUser.getId() < 0){
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"未登录");
+        }
+        return loginUser;
     }
 }
 
