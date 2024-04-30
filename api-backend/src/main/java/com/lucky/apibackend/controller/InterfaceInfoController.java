@@ -1,16 +1,14 @@
 package com.lucky.apibackend.controller;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.lucky.apibackend.annontation.AuthCheck;
 import com.lucky.apibackend.common.BaseResponse;
 import com.lucky.apibackend.common.ErrorCode;
+import com.lucky.apibackend.common.IdRequest;
 import com.lucky.apibackend.common.ResultUtils;
 import com.lucky.apibackend.constant.CommonConstant;
 import com.lucky.apibackend.constant.UserConstant;
@@ -20,12 +18,12 @@ import com.lucky.apibackend.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.lucky.apibackend.model.dto.interfaceinfo.RequestParamsField;
 import com.lucky.apibackend.model.dto.interfaceinfo.ResponseParamsField;
 import com.lucky.apibackend.model.entity.InterfaceInfo;
-import com.lucky.apibackend.model.entity.User;
 import com.lucky.apibackend.model.enums.InterfaceStatusEnum;
 import com.lucky.apibackend.model.vo.UserVo;
 import com.lucky.apibackend.service.InterfaceInfoService;
 import com.lucky.apibackend.service.UserService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -174,6 +172,46 @@ public class InterfaceInfoController {
             interfaceInfoPage.setRecords(interfaceInfoList);
         }
         return ResultUtils.success(interfaceInfoPage);
+    }
+
+    /**
+     * 发布接口
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @ApiOperation(value = "发布接口")
+    @PostMapping("/online")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,HttpServletRequest request){
+        if (ObjectUtils.anyNull(idRequest,idRequest.getId()) || idRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = idRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        //将接口状态设置为上线
+        interfaceInfo.setStatus(InterfaceStatusEnum.ONLINE.getValue());
+        return ResultUtils.success(interfaceInfoService.updateById(interfaceInfo));
+    }
+
+    @ApiOperation(value = "下线接口")
+    @PostMapping("/offline")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,HttpServletRequest request){
+        if (ObjectUtils.anyNull(idRequest,idRequest.getId()) || idRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = idRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        //将接口状态设置为下线
+        interfaceInfo.setStatus(InterfaceStatusEnum.OFFLINE.getValue());
+        return ResultUtils.success(interfaceInfoService.updateById(interfaceInfo));
     }
 }
 
