@@ -13,10 +13,7 @@ import com.lucky.apibackend.common.ResultUtils;
 import com.lucky.apibackend.constant.CommonConstant;
 import com.lucky.apibackend.constant.UserConstant;
 import com.lucky.apibackend.exception.BusinessException;
-import com.lucky.apibackend.model.dto.interfaceinfo.InterfaceInfoAddRequest;
-import com.lucky.apibackend.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
-import com.lucky.apibackend.model.dto.interfaceinfo.RequestParamsField;
-import com.lucky.apibackend.model.dto.interfaceinfo.ResponseParamsField;
+import com.lucky.apibackend.model.dto.interfaceinfo.*;
 import com.lucky.apibackend.model.entity.InterfaceInfo;
 import com.lucky.apibackend.model.enums.InterfaceStatusEnum;
 import com.lucky.apibackend.model.vo.UserVo;
@@ -134,7 +131,6 @@ public class InterfaceInfoController {
         if (interfaceInfoQueryRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
         InterfaceInfo interfaceInfoQuery = new InterfaceInfo();
         BeanUtils.copyProperties(interfaceInfoQueryRequest,interfaceInfoQuery);
         String name = interfaceInfoQueryRequest.getName();
@@ -169,6 +165,33 @@ public class InterfaceInfoController {
             List<InterfaceInfo> interfaceInfoList = interfaceInfoPage.getRecords().stream().
                     filter(interfaceInfo -> interfaceInfo.getStatus().equals(InterfaceStatusEnum.OFFLINE.getValue()))
                     .collect(Collectors.toList());
+            interfaceInfoPage.setRecords(interfaceInfoList);
+        }
+        return ResultUtils.success(interfaceInfoPage);
+    }
+
+
+    @GetMapping("/get/searchText")
+    @ApiOperation(value = "搜索接口")
+    public BaseResponse<Page<InterfaceInfo>> listInterfaceInfoBySearchTextPage(InterfaceInfoSearchTextRequest interfaceInfoSearchTextRequest,HttpServletRequest request){
+        if (interfaceInfoSearchTextRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String searchText = interfaceInfoSearchTextRequest.getSearchText();
+        long current = interfaceInfoSearchTextRequest.getCurrent();
+        long pageSize = interfaceInfoSearchTextRequest.getPageSize();
+        String sortField = interfaceInfoSearchTextRequest.getSortField();
+        String sortOrder = interfaceInfoSearchTextRequest.getSortOrder();
+
+        QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotBlank(searchText),"name",searchText)
+                .or().like(StringUtils.isNotBlank(searchText),"description",searchText)
+                .orderBy(StringUtils.isNotBlank(sortField),sortOrder.equals(CommonConstant.SORT_ORDER_ASC),sortField);
+        Page<InterfaceInfo> interfaceInfoPage = interfaceInfoService.page(new Page<>(current, pageSize), queryWrapper);
+        //不是管理员只能查看已上线的接口
+        if (!userService.isAdmin(request)){
+            List<InterfaceInfo> interfaceInfoList = interfaceInfoPage.getRecords().stream().filter(interfaceInfo ->
+                    interfaceInfo.getStatus().equals(InterfaceStatusEnum.ONLINE.getValue())).collect(Collectors.toList());
             interfaceInfoPage.setRecords(interfaceInfoList);
         }
         return ResultUtils.success(interfaceInfoPage);

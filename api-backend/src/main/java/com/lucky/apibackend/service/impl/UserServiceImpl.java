@@ -231,10 +231,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String token = request.getHeader("Authorization");
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE + token);
         UserVo loginUser = (UserVo) userObj;
-        if (loginUser == null || loginUser.getId() < 0){
+        if (loginUser == null || loginUser.getId() <= 0){
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"未登录");
         }
         return loginUser;
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE + token);
+        UserVo loginUser = (UserVo) userObj;
+        if (loginUser == null || loginUser.getId() <= 0){
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return loginUser != null && loginUser.getUserRole().equals(UserConstant.ADMIN_ROLE);
     }
 }
 

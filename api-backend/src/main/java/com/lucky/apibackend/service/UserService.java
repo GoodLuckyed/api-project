@@ -50,4 +50,10 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVo isTourist(HttpServletRequest request);
+
+    /**
+     * 是否是管理员
+     * @param request
+     */
+    boolean isAdmin(HttpServletRequest request);
 }

@@ -65,6 +65,16 @@ public class InterfaceInfo implements Serializable {
     private String requestExample;
 
     /**
+     * 消耗积分数
+     */
+    private Integer reduceScore;
+
+    /**
+     * 接口头像
+     */
+    private String avatarUrl;
+
+    /**
      * 接口状态（0-关闭，1-开启）
      */
     private Integer status;
@@ -80,6 +90,11 @@ public class InterfaceInfo implements Serializable {
     private Long userId;
 
     /**
+     * 接口总调用次数
+     */
+    private Long totalInvokes;
+
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -92,7 +107,6 @@ public class InterfaceInfo implements Serializable {
     /**
      * 是否删除(0-未删, 1-已删)
      */
-    @TableLogic
     private Integer isDelete;
 
     @TableField(exist = false)
