@@ -77,6 +77,10 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.lucky</groupId>
+            <artifactId>api-sdk</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

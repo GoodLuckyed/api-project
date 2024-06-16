@@ -25,6 +25,7 @@
         <junit.version>4.13.2</junit.version>
         <hutool-all.version>5.8.16</hutool-all.version>
         <knife4j-version>3.0.3</knife4j-version>
+        <api-sdk-version>0.0.1-SNAPSHOT</api-sdk-version>
     </properties>
 
     <dependencies>
@@ -76,6 +77,11 @@
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>${knife4j-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lucky</groupId>
+                <artifactId>api-sdk</artifactId>
+                <version>${api-sdk-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
