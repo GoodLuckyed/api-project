@@ -1,6 +1,6 @@
 package com.lucky.apibackend.mapper;
 
-import com.lucky.apibackend.model.entity.InterfaceInfo;
+import com.lucky.apicommon.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

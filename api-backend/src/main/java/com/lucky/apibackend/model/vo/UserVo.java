@@ -60,6 +60,11 @@ public class UserVo implements Serializable {
     private String secretKey;
 
     /**
+     * 钱包余额（积分）
+     */
+    private Integer balance;
+
+    /**
      * 创建时间
      */
     private Date createTime;

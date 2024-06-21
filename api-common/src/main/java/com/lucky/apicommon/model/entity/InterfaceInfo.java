@@ -1,10 +1,13 @@
-package com.lucky.apibackend.model.entity;
+package com.lucky.apicommon.model.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 接口信息表
@@ -12,7 +15,6 @@ import lombok.Data;
  */
 @TableName(value ="interface_info")
 @Data
-@Deprecated
 public class InterfaceInfo implements Serializable {
     /**
      * 主键

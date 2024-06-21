@@ -1,4 +1,4 @@
-package com.lucky.apibackend.common;
+package com.lucky.apicommon.common;
 
 
 /**

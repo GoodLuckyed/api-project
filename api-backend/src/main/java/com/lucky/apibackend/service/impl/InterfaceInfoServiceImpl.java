@@ -3,7 +3,7 @@ package com.lucky.apibackend.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lucky.apibackend.common.ErrorCode;
 import com.lucky.apibackend.exception.BusinessException;
-import com.lucky.apibackend.model.entity.InterfaceInfo;
+import com.lucky.apicommon.model.entity.InterfaceInfo;
 import com.lucky.apibackend.service.InterfaceInfoService;
 import com.lucky.apibackend.mapper.InterfaceInfoMapper;
 import org.apache.commons.lang3.StringUtils;

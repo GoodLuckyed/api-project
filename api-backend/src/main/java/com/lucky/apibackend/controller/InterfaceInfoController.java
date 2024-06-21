@@ -17,7 +17,7 @@ import com.lucky.apibackend.constant.CommonConstant;
 import com.lucky.apibackend.constant.UserConstant;
 import com.lucky.apibackend.exception.BusinessException;
 import com.lucky.apibackend.model.dto.interfaceinfo.*;
-import com.lucky.apibackend.model.entity.InterfaceInfo;
+import com.lucky.apicommon.model.entity.InterfaceInfo;
 import com.lucky.apibackend.model.enums.InterfaceStatusEnum;
 import com.lucky.apibackend.model.vo.UserVo;
 import com.lucky.apibackend.service.InterfaceInfoService;
