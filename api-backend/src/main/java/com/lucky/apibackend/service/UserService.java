@@ -56,4 +56,12 @@ public interface UserService extends IService<User> {
      * @param request
      */
     boolean isAdmin(HttpServletRequest request);
+
+    /**
+     * 更新用户积分（扣除）
+     * @param userId
+     * @param reduceScore
+     * @return
+     */
+    boolean reduceWalletBalance(Long userId, Integer reduceScore);
 }

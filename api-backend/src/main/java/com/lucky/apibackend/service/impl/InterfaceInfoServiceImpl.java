@@ -1,5 +1,6 @@
 package com.lucky.apibackend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lucky.apibackend.common.ErrorCode;
 import com.lucky.apibackend.exception.BusinessException;
@@ -49,6 +50,21 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (StringUtils.isNotBlank(description) && description.length() > 100) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口描述过长");
         }
+    }
+
+    /**
+     * 更新接口总调用次数
+     * @param interfaceInfoId 接口id
+     * @return
+     */
+    @Override
+    public boolean updateTotalInvokes(Long interfaceInfoId) {
+        LambdaQueryWrapper<InterfaceInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(InterfaceInfo::getId,interfaceInfoId);
+        InterfaceInfo interfaceInfo = this.getOne(queryWrapper);
+        interfaceInfo.setTotalInvokes(interfaceInfo.getTotalInvokes() + 1);
+        boolean result = this.updateById(interfaceInfo);
+        return result;
     }
 
 }

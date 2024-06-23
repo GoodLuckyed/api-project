@@ -9,31 +9,35 @@ import com.lucky.apicommon.model.enums.InterfaceStatusEnum;
 import com.lucky.apicommon.model.enums.UserAccountStatusEnum;
 import com.lucky.apicommon.model.vo.UserVo;
 import com.lucky.apicommon.service.inner.InnerInterfaceInfoService;
+import com.lucky.apicommon.service.inner.InnerUserInterfaceInvokeService;
 import com.lucky.apicommon.service.inner.InnerUserService;
 import com.lucky.apigateway.exception.BusinessException;
+import com.lucky.apigateway.utils.RedissonLockUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Resource;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.lucky.apisdk.utils.SignUtils.getSign;
@@ -58,6 +62,12 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
 
     @DubboReference
     private InnerInterfaceInfoService innerInterfaceInfoService;
+
+    @DubboReference
+    private InnerUserInterfaceInvokeService innerUserInterfaceInvokeService;
+
+    @Resource
+    private RedissonLockUtil redissonLockUtil;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -159,7 +169,7 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
                 }
             }
         }
-        return null;
+        return handleResponse(exchange,chain,user,interfaceInfo);
     }
 
     /**
@@ -181,6 +191,75 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
         });
         // 获得请求体数据
         return requestBodyRef.get();
+    }
+
+    /**
+     * 处理响应
+     * @param exchange
+     * @param chain
+     * @return
+     */
+    public Mono<Void> handleResponse(ServerWebExchange exchange, GatewayFilterChain chain, UserVo user, InterfaceInfo interfaceInfo) {
+        try {
+            // 获取原始的响应对象
+            ServerHttpResponse originalResponse = exchange.getResponse();
+            // 获取数据缓冲工厂
+            DataBufferFactory bufferFactory = originalResponse.bufferFactory();
+            // 获取响应的状态码
+            HttpStatus statusCode = originalResponse.getStatusCode();
+
+            // 判断状态码是否为200 OK
+            if(statusCode == HttpStatus.OK) {
+                // 创建一个装饰后的响应对象
+                ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
+
+                    // 重写writeWith方法，用于处理响应体的数据
+                    // 这段方法就是只要当我们的模拟接口调用完成之后,等它返回结果，
+                    // 就会调用writeWith方法,我们就能根据响应结果做一些自己的处理
+                    @Override
+                    public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+                        log.info("body instanceof Flux: {}", (body instanceof Flux));
+                        // 判断响应体是否是Flux类型
+                        if (body instanceof Flux) {
+                            Flux<? extends DataBuffer> fluxBody = Flux.from(body);
+                            // 返回一个处理后的响应体
+                            // (这里就理解为它在拼接字符串,它把缓冲区的数据取出来，一点一点拼接好)
+                            return super.writeWith(fluxBody.map(dataBuffer -> {
+                                // 扣除积分
+                                redissonLockUtil.redissonDistributedLocks("gateway" + user.getUserAccount().intern(),() -> {
+                                    boolean invoke = innerUserInterfaceInvokeService.invoke(interfaceInfo.getId(), user.getId(), interfaceInfo.getReduceScore());
+                                    if (!invoke){
+                                        throw new BusinessException(ErrorCode.OPERATION_ERROR,"接口调用失败");
+                                    }
+                                },"接口调用失败");
+                                // 读取响应体的内容并转换为字节数组
+                                byte[] content = new byte[dataBuffer.readableByteCount()];
+                                dataBuffer.read(content);
+                                DataBufferUtils.release(dataBuffer);//释放掉内存
+                                // 构建日志
+
+                                //rspArgs.add(requestUrl);
+                                String data = new String(content, StandardCharsets.UTF_8);//data
+                                log.info("响应结果" + data);
+                                // 将处理后的内容重新包装成DataBuffer并返回
+                                return bufferFactory.wrap(content);
+                            }));
+                        } else {
+                            log.error("<--- {} 响应code异常", getStatusCode());
+                        }
+                        return super.writeWith(body);
+                    }
+                };
+                // 对于200 OK的请求,将装饰后的响应对象传递给下一个过滤器链,并继续处理(设置repsonse对象为装饰过的)
+                return chain.filter(exchange.mutate().response(decoratedResponse).build());
+            }
+            // 对于非200 OK的请求，直接返回，进行降级处理
+            return chain.filter(exchange);
+        }catch (Exception e){
+            // 处理异常情况，记录错误日志
+            log.error("gateway log exception.\n" + e);
+            return chain.filter(exchange);
+        }
     }
 
     @Override

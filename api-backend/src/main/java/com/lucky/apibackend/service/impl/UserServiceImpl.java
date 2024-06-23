@@ -247,6 +247,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return loginUser != null && loginUser.getUserRole().equals(UserConstant.ADMIN_ROLE);
     }
+
+    /**
+     * 更新用户积分（扣除）
+     * @param userId
+     * @param reduceScore
+     * @return
+     */
+    @Override
+    public boolean reduceWalletBalance(Long userId, Integer reduceScore) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, userId);
+        User user = this.getOne(queryWrapper);
+        user.setBalance(user.getBalance() - reduceScore);
+        return this.updateById(user);
+    }
 }
 
 
