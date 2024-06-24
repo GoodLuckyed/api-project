@@ -60,6 +60,11 @@ public class InterfaceInfoAddRequest implements Serializable {
     private String requestExample;
 
     /**
+     * 消耗积分数
+     */
+    private Integer reduceScore;
+
+    /**
      * 请求类型
      */
     private String method;

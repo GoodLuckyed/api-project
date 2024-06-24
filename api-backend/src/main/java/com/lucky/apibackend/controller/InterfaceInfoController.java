@@ -92,7 +92,7 @@ public class InterfaceInfoController {
         UserVo loginUser = userService.getLoginUser(request);
         interfaceInfo.setUserId(loginUser.getId());
         boolean save = interfaceInfoService.save(interfaceInfo);
-        if (save){
+        if (!save){
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         return ResultUtils.success(interfaceInfo.getId());
