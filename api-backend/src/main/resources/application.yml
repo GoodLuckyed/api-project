@@ -44,3 +44,7 @@ dubbo:
   registry:
     id: nacos-registry
     address: nacos://localhost:8848
+api:
+  client:
+    access-key: 111
+    secret-key: 222

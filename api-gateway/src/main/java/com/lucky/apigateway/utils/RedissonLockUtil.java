@@ -164,8 +164,9 @@ public class RedissonLockUtil {
             // 尝试获取锁
             if(rLock.tryLock(0,-1,TimeUnit.MILLISECONDS)){
                 runnable.run();
+            }else {
+                throw new BusinessException(errorCode.getCode(),errormessage);
             }
-            throw new BusinessException(errorCode.getCode(),errormessage);
         } catch (InterruptedException e) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR,e.getMessage());
         } finally {
