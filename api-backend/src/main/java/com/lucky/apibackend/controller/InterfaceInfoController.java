@@ -9,10 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.lucky.apibackend.annontation.AuthCheck;
-import com.lucky.apibackend.common.BaseResponse;
-import com.lucky.apibackend.common.ErrorCode;
-import com.lucky.apibackend.common.IdRequest;
-import com.lucky.apibackend.common.ResultUtils;
+import com.lucky.apibackend.common.*;
 import com.lucky.apibackend.constant.CommonConstant;
 import com.lucky.apibackend.constant.UserConstant;
 import com.lucky.apibackend.exception.BusinessException;
@@ -75,8 +72,8 @@ public class InterfaceInfoController {
             List<RequestParamsField> requestParamsFields = interfaceInfoAddRequest.getRequestParams().stream()
                     .filter(field -> StringUtils.isNotBlank(field.getFieldName()))
                     .collect(Collectors.toList());
-            String requestParmas = JSONUtil.toJsonStr(requestParamsFields);
-            interfaceInfo.setRequestParams(requestParmas);
+            String requestParams = JSONUtil.toJsonStr(requestParamsFields);
+            interfaceInfo.setRequestParams(requestParams);
         }
         if (CollectionUtils.isNotEmpty(interfaceInfoAddRequest.getResponseParams())){
             List<ResponseParamsField> responseParamsFields = interfaceInfoAddRequest.getResponseParams().stream()
@@ -96,6 +93,71 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
         }
         return ResultUtils.success(interfaceInfo.getId());
+    }
+
+    /**
+     * 更新接口信息
+     * @return
+     */
+    @PostMapping( "/update")
+    @ApiOperation(value = "更新接口信息")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> updateInterInfo(@RequestBody InterfaceInfoUpdateRequest interfaceInfoUpdateRequest, HttpServletRequest request){
+        if (ObjectUtils.anyNull(interfaceInfoUpdateRequest,interfaceInfoUpdateRequest.getId()) || interfaceInfoUpdateRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = interfaceInfoUpdateRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"接口不存在");
+        }
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        if (CollectionUtils.isNotEmpty(interfaceInfoUpdateRequest.getRequestParams())){
+            List<RequestParamsField> requestParamsFields = interfaceInfoUpdateRequest.getRequestParams()
+                    .stream().filter(field -> StringUtils.isNotBlank(field.getFieldName()))
+                    .collect(Collectors.toList());
+            String requestParams = JSONUtil.toJsonStr(requestParamsFields);
+            interfaceInfo.setRequestParams(requestParams);
+        }
+        if (CollectionUtils.isNotEmpty(interfaceInfoUpdateRequest.getResponseParams())){
+            List<ResponseParamsField> responseParamsFields = interfaceInfoUpdateRequest.getResponseParams()
+                    .stream().filter(field -> StringUtils.isNotBlank(field.getFieldName()))
+                    .collect(Collectors.toList());
+            String responseParams = JSONUtil.toJsonStr(responseParamsFields);
+            interfaceInfo.setResponseParams(responseParams);
+        }
+        BeanUtils.copyProperties(interfaceInfoUpdateRequest,interfaceInfo);
+        // 校验
+        interfaceInfoService.validInterfaceInfo(interfaceInfo,false);
+        // 只允许本人和管理员更新接口
+        UserVo loginUser = userService.getLoginUser(request);
+        if (!loginUser.getId().equals(oldInterfaceInfo.getUserId()) && !userService.isAdmin(request)){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"无权限");
+        }
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+
+    @ApiOperation(value = "删除接口")
+    @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> delInterfaceInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request){
+        if (ObjectUtils.anyNull(deleteRequest,deleteRequest.getId()) || deleteRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserVo loginUser = userService.getLoginUser(request);
+        Long id = deleteRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        if (interfaceInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"接口不存在");
+        }
+        // 只允许本人和管理员删除接口
+        if (!interfaceInfo.getUserId().equals(loginUser.getId()) && !userService.isAdmin(request)){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"无权限");
+        }
+        boolean b = interfaceInfoService.removeById(id);
+        return ResultUtils.success(b);
     }
 
     /**
