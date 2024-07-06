@@ -31,6 +31,7 @@
         <dubbo.version>3.0.9</dubbo.version>
         <nacos-client.version>2.1.0</nacos-client.version>
         <redisson.version>3.17.5</redisson.version>
+        <cos_api.version>5.6.97</cos_api.version>
     </properties>
 
     <dependencies>
@@ -103,6 +104,12 @@
                 <artifactId>redisson</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.qcloud</groupId>
+                <artifactId>cos_api</artifactId>
+                <version>${cos_api.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

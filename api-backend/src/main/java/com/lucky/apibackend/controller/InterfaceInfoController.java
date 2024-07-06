@@ -138,6 +138,26 @@ public class InterfaceInfoController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 上传接口图片url
+     * @param interfaceUploadAvatarRequest
+     * @param request
+     * @return
+     */
+    @ApiOperation(value = "上传接口图片url")
+    @PostMapping("/uploadAvatar")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> uploadAvatarUrl(InterfaceUploadAvatarRequest interfaceUploadAvatarRequest,
+                                                 HttpServletRequest request){
+        if (ObjectUtils.anyNull(interfaceUploadAvatarRequest,interfaceUploadAvatarRequest.getId(),interfaceUploadAvatarRequest.getAvatarUrl()) ||
+                interfaceUploadAvatarRequest.getId() <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceUploadAvatarRequest.getId());
+        interfaceInfo.setAvatarUrl(interfaceUploadAvatarRequest.getAvatarUrl());
+        boolean result = interfaceInfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
 
     @ApiOperation(value = "删除接口")
     @PostMapping("/delete")
