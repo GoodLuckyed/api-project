@@ -26,4 +26,9 @@ public class UserConstant {
      * 管理员权限
      */
     public static final String ADMIN_ROLE = "admin";
+
+    /**
+     * 混淆ak、sk
+     */
+    public static final String VOUCHER = "accessKey_secretKey";
 }

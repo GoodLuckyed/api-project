@@ -64,4 +64,11 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean reduceWalletBalance(Long userId, Integer reduceScore);
+
+    /**
+     * 校验用户
+     * @param user
+     * @param add 是否是添加
+     */
+    void validUser(User user, boolean add);
 }

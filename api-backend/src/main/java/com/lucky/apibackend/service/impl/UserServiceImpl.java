@@ -2,6 +2,7 @@ package com.lucky.apibackend.service.impl;
 
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lucky.apibackend.common.BaseResponse;
 import com.lucky.apibackend.common.ErrorCode;
@@ -15,6 +16,7 @@ import com.lucky.apibackend.model.vo.UserVo;
 import com.lucky.apibackend.service.UserService;
 import com.lucky.apibackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -97,6 +99,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         //密码加密
         String encryptPassword = DigestUtils.md5DigestAsHex((UserConstant.SALT + userPassword).getBytes());
+
+        // todo 生成accessKey,secretKey
 
         //插入数据，保存到数据库
         User user = new User();
@@ -261,6 +265,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = this.getOne(queryWrapper);
         user.setBalance(user.getBalance() - reduceScore);
         return this.updateById(user);
+    }
+
+    /**
+     * 校验用户
+     * @param user
+     * @param add 是否是添加
+     */
+    @Override
+    public void validUser(User user, boolean add) {
+        if (user == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = user.getUserAccount();
+        String userPassword = user.getUserPassword();
+        Integer balance = user.getBalance();
+        // 是添加用户时 参数不能为空
+        if (add){
+            if (StringUtils.isAnyBlank(userAccount, userPassword)){
+                throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            }
+            //账户不能重复
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("userAccount",userAccount);
+            long count = userMapper.selectCount(queryWrapper);
+            if (count > 0){
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"账号已存在");
+            }
+            // 为用户自动生成8位邀请码
+            user.setInvitationCode(generateRandomString(8));
+            // 为用户生成accessKey、secretKey
+            String accessKey = DigestUtils.md5DigestAsHex((userAccount + UserConstant.SALT + UserConstant.VOUCHER).getBytes());
+            String secretKey = DigestUtils.md5DigestAsHex((UserConstant.SALT + UserConstant.VOUCHER + userAccount).getBytes());
+            user.setAccessKey(accessKey);
+            user.setSecretKey(secretKey);
+        }
+        //账号不包含特殊字符
+        if (StringUtils.isNotBlank(userAccount)){
+            String validPattern = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+            Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
+            if (matcher.find()) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号包含特殊字符");
+            }
+        }
+        //密码加密
+        if (StringUtils.isNotBlank(userPassword)){
+            String encryptPassword = DigestUtils.md5DigestAsHex((UserConstant.SALT + userPassword).getBytes());
+            user.setUserPassword(encryptPassword);
+        }
+        //积分不能小于0
+        if (ObjectUtils.isNotEmpty(balance) && balance < 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "积分不能为负数");
+        }
     }
 }
 
