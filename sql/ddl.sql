@@ -67,3 +67,23 @@ create table user_interface_invoke
     isDelete     tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户接口调用表';
+
+-- 产品信息表
+create table api.product_info
+(
+    id             bigint auto_increment comment 'id'
+        primary key,
+    name           varchar(256)                           not null comment '产品名称',
+    description    varchar(256)                           null comment '产品描述',
+    userId         bigint                                 not null comment '创建人',
+    total          int          default 0                 not null comment '金额（单位：分）',
+    addPoints      int          default 0                 not null comment '增加积分个数',
+    productType    varchar(256) default 'COIN'            not null comment '产品类型（VIP-会员  COIN-充值  COINACTIVITY-充值活动）',
+    status         tinyint      default 0                 not null comment '产品状态（0-默认下线  1-上线）',
+    expirationTime datetime                               null comment '过期时间',
+    createTime     datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime     datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete       tinyint      default 0                 not null comment '是否删除'
+)
+    comment '产品信息表';
+
