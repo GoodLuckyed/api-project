@@ -293,6 +293,20 @@ public class UserController {
         }
         return ResultUtils.success(true);
     }
+
+    /**
+     * 实时获取用户积分
+     * @param request
+     * @return
+     */
+    @GetMapping("/getBalance")
+    public BaseResponse<Integer> getBalance(HttpServletRequest request){
+        UserVo loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        User user = userService.getById(userId);
+        Integer balance = user.getBalance();
+        return ResultUtils.success(balance);
+    }
 }
 
 

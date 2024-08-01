@@ -318,6 +318,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "积分不能为负数");
         }
     }
+
+    /**
+     * 更新用户积分（添加）
+     * @param userId
+     * @param addPoints
+     */
+    @Override
+    public void addWalletBalance(Long userId, Integer addPoints) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, userId);
+        User user = this.getOne(queryWrapper);
+        user.setBalance(user.getBalance() + addPoints);
+        this.updateById(user);
+    }
 }
 
 

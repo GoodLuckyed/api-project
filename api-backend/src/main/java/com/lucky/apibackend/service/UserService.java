@@ -71,4 +71,11 @@ public interface UserService extends IService<User> {
      * @param add 是否是添加
      */
     void validUser(User user, boolean add);
+
+    /**
+     * 更新用户积分（添加）
+     * @param userId
+     * @param addPoints
+     */
+    void addWalletBalance(Long userId, Integer addPoints);
 }
