@@ -46,8 +46,12 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(OrderInfo::getProductId,productId);
         queryWrapper.eq(OrderInfo::getUserId,loginUser.getId());
-        queryWrapper.eq(OrderInfo::getStatus, OrderStatus.NOTPAY);
-        queryWrapper.eq(OrderInfo::getPaymentType,paymentType);
+        queryWrapper.eq(OrderInfo::getStatus, OrderStatus.NOTPAY.getType());
+        if (paymentType.equals("ALIPAY")){
+            queryWrapper.eq(OrderInfo::getPaymentType,PayType.ALIPAY.getType());
+        }else {
+            queryWrapper.eq(OrderInfo::getPaymentType,PayType.WXPAY.getType());
+        }
         OrderInfo oldOrderInfo = this.getOne(queryWrapper);
         if (oldOrderInfo != null){
             return oldOrderInfo;

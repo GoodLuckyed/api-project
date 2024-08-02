@@ -26,4 +26,10 @@ public interface AliPayService {
      * @return
      */
     String tradeNotify(Map<String, String> params);
+
+    /**
+     * 用户取消订单
+     * @param orderNo
+     */
+    void closeOrder(String orderNo);
 }

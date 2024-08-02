@@ -4,9 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayConstants;
+import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.lucky.apibackend.common.ErrorCode;
 import com.lucky.apibackend.exception.BusinessException;
 import com.lucky.apibackend.model.dto.alipay.PayCreateRequest;
@@ -193,6 +197,23 @@ public class AliPayServiceImpl implements AliPayService {
         return "success";
     }
 
+
+    /**
+     * 用户取消订单
+     * @param orderNo
+     */
+    @Override
+    public void closeOrder(String orderNo) {
+        // 判断订单是否存在
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getOrderNo,orderNo);
+        OrderInfo orderInfo = orderInfoService.getOrderByOrderNo(orderNo);
+        if (orderInfo == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 更新订单状态
+        orderInfoService.updateStatusByOrderNo(orderNo,OrderStatus.CANCEL);
+    }
 }
 
 
