@@ -68,6 +68,15 @@ public class ServiceController {
     }
 
     /**
+     * 随机获取笑话
+     * @return
+     */
+    @GetMapping("/joke")
+    public String getJoke(){
+        return get("https://api.vvhan.com/api/text/joke");
+    }
+
+    /**
      * 随机获取文案
      * @return
      */

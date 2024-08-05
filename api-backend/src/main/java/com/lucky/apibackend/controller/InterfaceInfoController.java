@@ -257,7 +257,7 @@ public class InterfaceInfoController {
         //不是管理员只能查看已上线的接口
         if (user == null || !user.getUserRole().equals(UserConstant.ADMIN_ROLE)){
             List<InterfaceInfo> interfaceInfoList = interfaceInfoPage.getRecords().stream().
-                    filter(interfaceInfo -> interfaceInfo.getStatus().equals(InterfaceStatusEnum.OFFLINE.getValue()))
+                    filter(interfaceInfo -> interfaceInfo.getStatus().equals(InterfaceStatusEnum.ONLINE.getValue()))
                     .collect(Collectors.toList());
             interfaceInfoPage.setRecords(interfaceInfoList);
         }

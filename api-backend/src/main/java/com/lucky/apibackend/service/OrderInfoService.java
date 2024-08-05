@@ -6,6 +6,8 @@ import com.lucky.apibackend.model.entity.OrderInfo;
 import com.lucky.apibackend.model.enums.OrderStatus;
 import com.lucky.apibackend.model.vo.UserVo;
 
+import java.util.List;
+
 /**
 * @author ccc
 * @description 针对表【order_info(订单信息表)】的数据库操作Service
@@ -35,4 +37,11 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * @param orderStatus
      */
     void updateStatusByOrderNo(String outTradeNo, OrderStatus orderStatus);
+
+    /**
+     * 查询创建超过xx minutes分钟并且未支付的订单
+     * @param paymentType
+     * @return
+     */
+    List<OrderInfo> getNoPayOrderByDuration(String paymentType);
 }

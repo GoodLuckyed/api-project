@@ -20,7 +20,9 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
 * @author ccc
@@ -107,6 +109,22 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(OrderInfo::getOrderNo,outTradeNo);
         this.update(orderInfo,queryWrapper);
+    }
+
+    /**
+     * 查询创建超过minutes分钟并且未支付的订单
+     * @param paymentType
+     * @return
+     */
+    @Override
+    public List<OrderInfo> getNoPayOrderByDuration(String paymentType) {
+        Instant instant = Instant.now();
+        Date date = Date.from(instant);
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getPaymentType,paymentType);
+        queryWrapper.eq(OrderInfo::getStatus,OrderStatus.NOTPAY.getType());
+        queryWrapper.le(OrderInfo::getExpirationTime,date);
+        return this.list(queryWrapper);
     }
 }
 

@@ -5,6 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author lucky
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication
 @MapperScan("com.lucky.apibackend.mapper")
 @EnableDubbo
+@EnableScheduling
 public class ApiBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(ApiBackendApplication.class, args);
