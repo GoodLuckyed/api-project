@@ -1,10 +1,9 @@
 <h1 align="center">API接口开放平台</h1>
 <p align="center"><strong>API 接口开放平台是一个为用户和开发者提供全面API接口调用服务的平台 🛠</strong></p>
 <div align="center">
-<a target="_blank" href="https://github.com/qimu666/qi-api">
-    <img alt="" src="https://img.shields.io/github/stars/qimu666/qi-api.svg?style=social&label=Stars"/>
+<a>
+<img alt="Maven" src="https://raster.shields.io/badge/Maven-3.6.3-red.svg"/>
 </a>
-    <img alt="Maven" src="https://raster.shields.io/badge/Maven-3.6.3-red.svg"/>
 <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">
         <img alt="" src="https://img.shields.io/badge/JDK-1.8+-green.svg"/>
 </a>
